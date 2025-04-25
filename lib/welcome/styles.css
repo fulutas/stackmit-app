@@ -1,0 +1,16 @@
+:root {
+  --welcome-c-variant: #8aa6cf;
+}
+
+:root.light {
+  --welcome-c-variant: #43679d;
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
