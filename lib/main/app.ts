@@ -5,6 +5,7 @@ import appIcon from '@/resources/build/icon.png?asset'
 import fs from "fs"
 import util from 'util'
 import { exec } from 'child_process'
+import { installExtension, REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer';
 
 let mainWindow;
 const execPromise = util.promisify(exec);
@@ -48,9 +49,16 @@ export function createAppWindow(): void {
   } else {
     mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'))
   }
+
+
 }
+app.whenReady().then(() => {
+  installExtension([REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS], { loadExtensionOptions: { allowFileAccess: true } })
+    .then(([redux, react]) => console.log(`Added Extensions:  ${redux.name}, ${react.name}`))
+    .catch((err) => console.log('An error occurred: ', err));
+});
 
-
+// IPC Events
 ipcMain.handle('select-directories', async () => {
   const result = await dialog.showOpenDialog(mainWindow, {
     properties: ['openDirectory', 'multiSelections']
@@ -149,4 +157,13 @@ ipcMain.handle('select-directories', async () => {
   }));
 
   return directoryInfos;
+});
+
+ipcMain.handle('open-in-vscode', async (_, directoryPath) => {
+  const { exec } = require('child_process');
+  exec(`code "${directoryPath}"`);
+});
+
+ipcMain.handle('open-directory', async (_, directoryPath) => {
+  await shell.openPath(directoryPath);
 });

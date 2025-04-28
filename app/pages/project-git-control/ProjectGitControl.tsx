@@ -1,36 +1,43 @@
 import { useMatches } from 'react-router-dom';
-import PageHeader from '../components/page-shared/PageHeader';
-import PageContent from '../components/page-shared/PageContent';
-import { ipcRenderer } from 'electron';
+import PageHeader from '../../components/page-shared/PageHeader';
+import PageContent from '../../components/page-shared/PageContent';
+import { toast } from 'sonner';
+import { useState } from 'react';
+import PageIntro from './PageIntro';
+import DirectoryList, { DirectoryInfo } from './DirectoryList';
+
+declare global {
+  interface Window {
+    gitLib: any;
+  }
+}
+
 
 const ProjectGitControl = () => {
   const matches = useMatches();
   const activeMatch = matches[matches.length - 1] as { handle: { pageTitle: string } };
   const pageTitle = activeMatch?.handle?.pageTitle;
 
-  let directories = [];
+  const [directories, setDirectories] = useState<DirectoryInfo[]>([]);
 
   const handleNewProject = async () => {
     console.log("Yeni proje oluşturuluyor");
-
     try {
-      directories = await window.electronAPI.selectDirectories();
-      // renderDirectories();
-      console.log(directories)
-      if (directories.length > 0) {
-        // commitContainer.style.display = 'block';
-        // searchContainer.style.display = 'block';
+      const directoryList = await window.gitLib.selectDirectories()
+      setDirectories(directoryList);
+      console.log("directoryList", directoryList)
+      if (directoryList.length > 0) {
+        toast.success('Klasörler başarıyla seçildi.')
       }
     } catch (error) {
       console.error('Klasör seçme hatası:', error);
-      alert('Klasör seçme sırasında bir hata oluştu.');
+      toast.error('Klasör seçme sırasında bir hata oluştu.')
     }
 
   };
 
   return (
     <>
-      {/* Page Header - sayfanın en üstünde */}
       <PageHeader
         title={pageTitle}
         description="Manage your git repositories easily."
@@ -52,9 +59,8 @@ const ProjectGitControl = () => {
       />
 
       <PageContent>
-        <div>
-
-        </div>
+        {directories.length > 0 && <DirectoryList directories={directories} setDirectories={setDirectories} />}
+        {directories.length === 0 && <PageIntro />}
       </PageContent>
     </>
   );

@@ -1,13 +1,14 @@
 import ReactDOM from 'react-dom/client'
 import { Navigate, RouterProvider, createHashRouter } from 'react-router-dom';
 import { WindowContextProvider, menuItems } from '@/lib/window'
+import { Toaster } from 'sonner';
 
 import appIcon from '@/resources/build/icon.png'
 import '@/lib/window/window.css'
 import './styles/app.css'
 
 import Layout from './components/page-shared/Layout';
-import ProjectGitControl from './pages/ProjectGitControl';
+import ProjectGitControl from './pages/project-git-control/ProjectGitControl';
 import Profile from './pages/Profile';
 
 const router = createHashRouter([
@@ -23,6 +24,7 @@ const router = createHashRouter([
 
 ReactDOM.createRoot(document.getElementById('app') as HTMLElement).render(
   <WindowContextProvider titlebar={{ title: 'Stackmit', icon: appIcon, menuItems }}>
+    <Toaster richColors position="top-right" />
     <RouterProvider router={router} />
   </WindowContextProvider>
 )

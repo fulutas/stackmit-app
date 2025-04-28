@@ -13,6 +13,12 @@ const api = {
   removeAllListeners: (channel: string) => {
     ipcRenderer.removeAllListeners(channel)
   },
+  openInVSCode: (directoryPath: string) => {
+    ipcRenderer.invoke('open-in-vscode', directoryPath);
+  },
+  openDirectory: (directoryPath: string) => {
+    ipcRenderer.invoke('open-directory', directoryPath);
+  }
 }
 
 export default api
