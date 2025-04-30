@@ -163,8 +163,19 @@ ipcMain.handle('select-directories', async () => {
   return directoryInfos;
 });
 
-ipcMain.handle('send-commit', async (_, { directories, commitMessage }) => {
+ipcMain.handle('send-commit', async (_, payload) => {
+  const { directories, commitMessage } = payload || {}; // null/undefined güvenliği
+
   const results = [];
+
+  if (!directories || !commitMessage) {
+    return [{
+      path: null,
+      name: null,
+      success: false,
+      message: 'Eksik parametre: directories veya commitMessage yok'
+    }];
+  }
 
   for (const dir of directories) {
     try {
