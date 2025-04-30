@@ -10,7 +10,8 @@ if (process.contextIsolated) {
     contextBridge.exposeInMainWorld('electron', electronAPI)
     contextBridge.exposeInMainWorld('api', api)
     contextBridge.exposeInMainWorld('gitLib', {
-      selectDirectories: () => ipcRenderer.invoke('select-directories')
+      selectDirectories: () => ipcRenderer.invoke('select-directories'),
+      sendCommit: (payload) => ipcRenderer.invoke('send-commit', payload)
     });
   } catch (error) {
     console.error(error)

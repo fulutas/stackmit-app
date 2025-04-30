@@ -68,6 +68,8 @@ ipcMain.handle('select-directories', async () => {
     return [];
   }
 
+  console.log(result)
+
   mainWindow.webContents.send('loading-start'); // 🔴 Renderer'a sinyal gönder
   const directoryInfos = await Promise.all(result.filePaths.map(async (dirPath) => {
     try {
@@ -159,6 +161,39 @@ ipcMain.handle('select-directories', async () => {
   mainWindow.webContents.send('loading-end');
 
   return directoryInfos;
+});
+
+ipcMain.handle('send-commit', async (_, { directories, commitMessage }) => {
+  const results = [];
+
+  for (const dir of directories) {
+    try {
+      // Değişiklikleri kaydet
+      await execPromise('git add .', { cwd: dir.path });
+
+      // Commit oluştur
+      await execPromise(`git commit -m "${commitMessage}"`, { cwd: dir.path });
+
+      // Push
+      await execPromise('git push origin HEAD', { cwd: dir.path });
+
+      results.push({
+        path: dir.path,
+        name: dir.name,
+        success: true,
+        message: 'Commit ve push başarılı'
+      });
+    } catch (error) {
+      results.push({
+        path: dir.path,
+        name: dir.name,
+        success: false,
+        message: `Hata: ${error.message}`
+      });
+    }
+  }
+
+  return results;
 });
 
 ipcMain.handle('open-in-vscode', async (_, directoryPath) => {
