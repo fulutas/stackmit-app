@@ -167,7 +167,7 @@ ipcMain.handle('send-commit', async (_, payload) => {
   const { directories, commitMessage } = payload || {}; // null/undefined güvenliği
 
   const results = [];
-
+  console.log("send-commit", directories)
   for (const dir of directories) {
     try {
       // Değişiklikleri kaydet
