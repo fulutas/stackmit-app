@@ -168,15 +168,6 @@ ipcMain.handle('send-commit', async (_, payload) => {
 
   const results = [];
 
-  if (!directories || !commitMessage) {
-    return [{
-      path: null,
-      name: null,
-      success: false,
-      message: 'Eksik parametre: directories veya commitMessage yok'
-    }];
-  }
-
   for (const dir of directories) {
     try {
       // Değişiklikleri kaydet
