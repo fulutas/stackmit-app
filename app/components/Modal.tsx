@@ -41,15 +41,15 @@ const Modal: React.FC<ModalProps> = ({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          onClick={handleOverlayClick} // dışa tıklama
+          onClick={handleOverlayClick}
         >
           <motion.div
-            onClick={stopPropagation} // içeriğe tıklamayı engelle
+            onClick={stopPropagation}
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className={`relative w-full ${sizeClasses[size]} rounded-2xl bg-white dark:bg-gray-900 p-6 shadow-xl`}
+            className={`relative w-full ${sizeClasses[size]} max-h-[90vh] rounded-2xl bg-white dark:bg-gray-900 p-6 shadow-xl`}
           >
             {!hideCloseButton && (
               <button
@@ -66,7 +66,10 @@ const Modal: React.FC<ModalProps> = ({
               </h2>
             )}
 
-            <div>{children}</div>
+            {/* Scrollable content area */}
+            <div className="max-h-[60vh] overflow-y-auto pr-2">
+              {children}
+            </div>
           </motion.div>
         </motion.div>
       )}

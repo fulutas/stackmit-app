@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import { FaGitAlt, FaFolder, FaCodeBranch, FaGitlab } from "react-icons/fa";
+import { FaGitAlt, FaFolder, FaCodeBranch } from "react-icons/fa";
 import { BiLogoVisualStudio } from "react-icons/bi";
 import { IoLink } from "react-icons/io5";
 import { TbGitBranch } from "react-icons/tb";
 import { VscGitPullRequestNewChanges } from "react-icons/vsc";
-import Modal from "@/app/components/Modal";
+import ProjectVersionChangesModal from "./ProjectVersionChangesModal";
 
 export interface DirectoryInfo {
   path: string;
@@ -32,6 +32,7 @@ const DirectoryList: React.FC<Props> = ({ directories, setDirectories }) => {
   const [filterPendingChanges, setFilterPendingChanges] = useState(false);
   const [filterGitRepo, setFilterGitRepo] = useState(false);
   const [changeModalOpen, setChangeModalOpen] = useState(false);
+  const [changeModalDetail, setChangeModalDetail] = useState<DirectoryInfo | Object>({});
 
   const filteredDirectories = directories.filter((dir) => {
     const matchesSearchTerm =
@@ -43,6 +44,8 @@ const DirectoryList: React.FC<Props> = ({ directories, setDirectories }) => {
 
     return matchesSearchTerm && matchesPendingChanges && matchesGitRepo;
   });
+
+  console.log(filteredDirectories)
 
   return (
     <>
@@ -80,9 +83,10 @@ const DirectoryList: React.FC<Props> = ({ directories, setDirectories }) => {
         )}
 
         <div className="space-y-4">
-          {filteredDirectories.length > 0 && filteredDirectories.map((dir) => (
+          {filteredDirectories.length > 0 && filteredDirectories.map((dir, index) => (
             <div
               key={dir.path}
+              data-index={index}
               className="rounded-2xl border border-gray-200 dark:border-gray-700 p-5 shadow-md hover:shadow-lg transition-shadow bg-white dark:bg-gray-900"
             >
               <div className="flex items-start justify-between">
@@ -102,6 +106,13 @@ const DirectoryList: React.FC<Props> = ({ directories, setDirectories }) => {
                         <span className="font-medium flex gap-1 items-center"> <FaCodeBranch /> Current Branch: </span>
                         {dir.currentBranch}
                       </div>
+                      <div className="flex gap-1 text-sm text-gray-600 dark:text-gray-400">
+                        <span className="font-medium flex gap-1 items-center">
+                          <TbGitBranch />
+                          All Branches:
+                        </span>
+                        {dir.allBranches.join(', ')}
+                      </div>
                       <div className="flex gap-1 text-sm">
                         <span className="font-medium flex gap-1 items-center">
                           <IoLink />
@@ -116,18 +127,6 @@ const DirectoryList: React.FC<Props> = ({ directories, setDirectories }) => {
                           {dir.gitRemoteUrl}
                         </a>
                       </div>
-                      <div className="flex gap-1 text-sm text-gray-600 dark:text-gray-400">
-                        <span className="font-medium flex gap-1 items-center">
-                          <TbGitBranch />
-                          Branches:
-                        </span>
-                        {dir.allBranches.join(', ')}
-                      </div>
-                      {/* {dir.pendingChanges && (
-                      <div className="text-sm text-yellow-600">
-                        <span className="font-medium">Pending Changes:</span> {dir.pendingChanges}
-                      </div>
-                    )} */}
                     </div>
                   )}
                 </div>
@@ -151,7 +150,10 @@ const DirectoryList: React.FC<Props> = ({ directories, setDirectories }) => {
                   </button>
                   {dir.pendingChanges && (
                     <button
-                      onClick={() => setChangeModalOpen(true)}
+                      onClick={() => {
+                        setChangeModalDetail(dir)
+                        setChangeModalOpen(true)
+                      }}
                       className="flex gap-2 items-center mt-4 px-4 py-2 w-full cursor-pointer bg-yellow-600 text-white text-sm rounded-lg hover:bg-yellow-700 transition"
                     >
                       <VscGitPullRequestNewChanges />
@@ -172,16 +174,9 @@ const DirectoryList: React.FC<Props> = ({ directories, setDirectories }) => {
           )}
         </div>
       </div>
-      <Modal
-        isOpen={changeModalOpen}
-        onClose={() => setChangeModalOpen(false)}
-        title="Example Modal"
-        size="lg"
-      >
-        <p className="text-gray-700 dark:text-gray-300">
-          This is a reusable modal. You can put any content here.
-        </p>
-      </Modal>
+
+      {changeModalOpen && <ProjectVersionChangesModal changeModalDetail={changeModalDetail} setChangeModalDetail={setChangeModalDetail} changeModalOpen={changeModalOpen} setChangeModalOpen={setChangeModalOpen} />}
+
     </>
   );
 };

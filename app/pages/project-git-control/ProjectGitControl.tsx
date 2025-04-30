@@ -23,7 +23,10 @@ const ProjectGitControl = () => {
   const [loadingProjectFolder, setLoadingProjectFolder] = useState(false);
 
   useEffect(() => {
-    window.electron.ipcRenderer.on('loading-start', () => setLoadingProjectFolder(true));
+    window.electron.ipcRenderer.on('loading-start', () => {
+      setLoadingProjectFolder(true)
+      setDirectories([])
+    });
     window.electron.ipcRenderer.on('loading-end', () => setLoadingProjectFolder(false));
   }, []);
 
@@ -31,10 +34,10 @@ const ProjectGitControl = () => {
     try {
       const directoryList = await window.gitLib.selectDirectories();
       setDirectories(directoryList);
-      if (directoryList.length > 0) toast.success('Klasörler başarıyla seçildi.');
+      if (directoryList.length > 0) toast.success('Folders successfully selected.');
     } catch (error) {
       console.error('Klasör seçme hatası:', error);
-      toast.error('Klasör seçme ve işleme sırasında bir hata oluştu.');
+      toast.error('An error occurred during folder selection and processing.');
     }
   };
 
