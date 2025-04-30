@@ -114,7 +114,7 @@ const DirectoryList: React.FC<Props> = ({ directories, setDirectories }) => {
     <>
       <div className="p-6">
         <div className="flex justify-between items-baseline">
-          <h1 className="w-full text-3xl text-white font-bold mb-6">Git Repositories ({filteredDirectories.length})</h1>
+          <h1 className="w-full text-3xl text-white font-bold mb-6">Projects ({filteredDirectories.length})</h1>
           {directories.length > 0 && (
             <button
               onClick={() => openBatchCommit()}

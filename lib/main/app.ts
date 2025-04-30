@@ -164,31 +164,31 @@ ipcMain.handle('select-directories', async () => {
 });
 
 ipcMain.handle('send-commit', async (_, payload) => {
-  const { directories, commitMessage } = payload || {}; // null/undefined güvenliği
+  const { directories, commitMessage } = payload || {};
 
   const results = [];
   console.log("send-commit", directories)
   for (const dir of directories) {
     try {
       // Değişiklikleri kaydet
-      await execPromise('git add .', { cwd: dir.path });
+      await execPromise('git add .', { cwd: dir });
 
       // Commit oluştur
-      await execPromise(`git commit -m "${commitMessage}"`, { cwd: dir.path });
+      await execPromise(`git commit -m "${commitMessage}"`, { cwd: dir });
 
       // Push
-      await execPromise('git push origin HEAD', { cwd: dir.path });
+      await execPromise('git push origin HEAD', { cwd: dir });
 
       results.push({
-        path: dir.path,
-        name: dir.name,
+        path: dir,
+        // name: dir.name,
         success: true,
         message: 'Commit ve push başarılı'
       });
     } catch (error) {
       results.push({
-        path: dir.path,
-        name: dir.name,
+        path: dir,
+        // name: dir.name,
         success: false,
         message: `Hata: ${error.message}`
       });
