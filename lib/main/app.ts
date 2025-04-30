@@ -68,6 +68,7 @@ ipcMain.handle('select-directories', async () => {
     return [];
   }
 
+  mainWindow.webContents.send('loading-start'); // 🔴 Renderer'a sinyal gönder
   const directoryInfos = await Promise.all(result.filePaths.map(async (dirPath) => {
     try {
       const isGitRepo = fs.existsSync(path.join(dirPath, '.git'));
@@ -155,6 +156,7 @@ ipcMain.handle('select-directories', async () => {
       };
     }
   }));
+  mainWindow.webContents.send('loading-end');
 
   return directoryInfos;
 });
