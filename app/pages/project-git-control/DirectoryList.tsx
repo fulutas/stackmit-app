@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useRef } from "react";
-import { FaGitAlt, FaFolder, FaCodeBranch } from "react-icons/fa";
+import React, { useEffect, useState } from "react";
+import { FaFolder, FaCodeBranch } from "react-icons/fa";
 import { BiLogoVisualStudio } from "react-icons/bi";
 import { IoLink } from "react-icons/io5";
 import { TbGitBranch } from "react-icons/tb";
@@ -32,8 +32,6 @@ interface Props {
   setDirectories: React.Dispatch<React.SetStateAction<DirectoryInfo[]>>;
 }
 const DirectoryList: React.FC<Props> = ({ directories, setDirectories }) => {
-  const repoRefreshButtonRef = useRef<HTMLButtonElement>(null);
-
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [repoRefreshStatus, setRepoRefreshStatus] = useState<Record<string, string>>({});
 
@@ -57,12 +55,13 @@ const DirectoryList: React.FC<Props> = ({ directories, setDirectories }) => {
     return matchesSearchTerm && matchesPendingChanges && matchesGitRepo;
   });
 
+  // Effect to handle the "Select All Changed" filter
   useEffect(() => {
     if (filterSelectAllChanged) {
       const changedPaths = filteredDirectories
         .filter((dir) => dir.pendingChanges)
         .map((dir) => dir.path);
-      console.log(changedPaths)
+
       setSelectedDirectories((prev) => {
         const merged = [...new Set([...prev, ...changedPaths])];
         return merged;
@@ -152,10 +151,10 @@ const DirectoryList: React.FC<Props> = ({ directories, setDirectories }) => {
       setDirectories((prev) =>
         prev.map((dir) => (dir.path === updatedDir.path ? updatedDir : dir))
       );
-      toast.success('Repository updates checked successfully.');
+      toast.success(`${dirPath.split('/').pop()} repository updated successfully.`);
     } catch (error) {
       console.error('Error checking repository updates:', error);
-      toast.error('An error occurred while checking repository updates.');
+      toast.error(`${dirPath.split('/').pop()} repository update failed.`);
     }
   };
 
@@ -239,19 +238,19 @@ const DirectoryList: React.FC<Props> = ({ directories, setDirectories }) => {
                 <div className="flex gap-4">
                   <input
                     type="checkbox"
-                    className={classNames('mt-1 cursor-pointer accent-blue-600 w-5 h-5', { 'opacity-40 !cursor-not-allowed': !dir.isGitRepo || !dir.fileDiffs.length })}
+                    className={classNames('mt-1 border cursor-pointer accent-blue-600 w-5 h-5', { 'opacity-40 !cursor-not-allowed': !dir.isGitRepo || !dir.fileDiffs.length })}
                     checked={selectedDirectories.includes(dir.path)}
                     title={!dir.isGitRepo || !dir.fileDiffs.length ? 'No git repository or no file diffs available' : 'Select this directory'}
                     disabled={!dir.isGitRepo || !dir.fileDiffs.length}
                     onChange={() => directoriesCheckboxChange(dir.path)}
                   />
                   <div className="flex flex-col">
-                    <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+                    <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 text-ellipsis overflow-hidden">
                       {dir.name}
                     </h2>
                     <p
                       onClick={() => window.api.openDirectory(dir.path)}
-                      className="flex gap-2 items-center text-sm text-gray-400 hover:underline cursor-pointer">
+                      className="flex gap-2 items-center text-sm text-gray-400 hover:underline cursor-pointer text-ellipsis overflow-hidden">
                       <FaFolder /> {dir.path}
                     </p>
                     {dir.isGitRepo && (
