@@ -14,6 +14,7 @@ if (process.contextIsolated) {
       refreshDirectories: (directories) => ipcRenderer.invoke('refresh-directories', directories),
       sendCommit: (payload) => ipcRenderer.invoke('send-commit', payload),
       repoCheckUpdates: (dirPath) => ipcRenderer.invoke('repo-check-updates', dirPath),
+      gitPull: (dirPath) => ipcRenderer.invoke('git-pull', dirPath),
     });
   } catch (error) {
     console.error(error)

@@ -34,6 +34,7 @@ interface Props {
 const DirectoryList: React.FC<Props> = ({ directories, setDirectories }) => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [repoRefreshStatus, setRepoRefreshStatus] = useState<Record<string, string>>({});
+  const [repoGitPullStatus, setRepoGitPullStatus] = useState<Record<string, string>>({});
 
   const [filterPendingChanges, setFilterPendingChanges] = useState<boolean>(false);
   const [filterGitRepo, setFilterGitRepo] = useState<boolean>(false);
@@ -155,6 +156,34 @@ const DirectoryList: React.FC<Props> = ({ directories, setDirectories }) => {
     } catch (error) {
       console.error('Error checking repository updates:', error);
       toast.error(`${dirPath.split('/').pop()} repository update failed.`);
+    }
+  };
+
+  const repoGitPull = async (dirPath: string) => {
+    try {
+      const resGitPull = await window.gitLib.gitPull(dirPath);
+      console.log(resGitPull)
+
+      // Eğer güncel ve değişiklik yoksa buton yazısını değiştir
+      if (resGitPull.success) {
+        setRepoGitPullStatus((prev) => ({ ...prev, [dirPath]: 'Pull success' }));
+
+        setTimeout(() => {
+          setRepoGitPullStatus((prev) => {
+            const updated = { ...prev };
+            delete updated[dirPath];
+            return updated;
+          });
+        }, 2000);
+      }
+
+      setDirectories((prev) =>
+        prev.map((dir) => (dir.path === resGitPull.path ? resGitPull : dir))
+      );
+      toast.success(`${dirPath.split('/').pop()} repository pulled successfully.`);
+    } catch (error) {
+      console.error('Error checking repository updates:', error);
+      toast.error(`${dirPath.split('/').pop()} repository pull failed.`);
     }
   };
 
@@ -329,9 +358,19 @@ const DirectoryList: React.FC<Props> = ({ directories, setDirectories }) => {
                     )}
                     {repoRefreshStatus[dir.path] || 'Check Updates'}
                   </button>
-                  <button className="flex gap-2 cursor-pointer justify-center items-center px-4 py-2 bg-gray-700 text-white text-sm rounded-lg hover:opacity-90 transition">
-                    <FaCodePullRequest size={16} />
-                    Pull
+                  <button
+                    onClick={() => repoGitPull(dir.path)}
+                    className={classNames(
+                      "flex gap-2 cursor-pointer justify-center items-center px-4 py-2 text-white text-sm rounded-lg transition",
+                      repoGitPullStatus[dir.path] === 'Pull success' ? "bg-green-600 hover:bg-green-700" : "bg-gray-700 hover:opacity-90"
+                    )}
+                  >
+                    {repoGitPullStatus[dir.path] === 'Pull success' ? (
+                      <FaCheck size={16} />
+                    ) : (
+                      <FaCodePullRequest size={16} />
+                    )}
+                    {repoGitPullStatus[dir.path] || 'Git Pull'}
                   </button>
                 </div>
               </div>

@@ -321,3 +321,12 @@ ipcMain.handle('repo-check-updates', async (_, dirPath) => {
     };
   }
 });
+
+ipcMain.handle('git-pull', async (_, dirPath) => {
+  try {
+    await execPromise('git pull', { cwd: dirPath });
+    return { success: true };
+  } catch (error) {
+    return { success: false, message: (error as Error).message };
+  }
+});
