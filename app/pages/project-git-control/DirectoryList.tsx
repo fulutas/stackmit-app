@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { FaFolder, FaCodeBranch } from "react-icons/fa";
+import { FaFolder, FaCodeBranch, FaGit, FaCheck } from "react-icons/fa";
 import { BiLogoVisualStudio, BiPackage } from "react-icons/bi";
-import { IoLink } from "react-icons/io5";
+import { IoLink, IoRefresh } from "react-icons/io5";
 import { TbGitBranch } from "react-icons/tb";
 import { VscGitPullRequestNewChanges } from "react-icons/vsc";
 import ProjectVersionChangesModal from "./ProjectVersionChangesModal";
@@ -9,7 +9,8 @@ import { FiSend } from "react-icons/fi";
 import SendBatchCommitModal from "./SendBatchCommitModal";
 import { toast } from "sonner";
 import { MoonLoader } from "react-spinners";
-import { FaXmark } from "react-icons/fa6";
+import { FaCodePullRequest, FaXmark } from "react-icons/fa6";
+import classNames from "classnames";
 
 export interface DirectoryInfo {
   path: string;
@@ -237,6 +238,12 @@ const DirectoryList: React.FC<Props> = ({ directories, setDirectories }) => {
           {directories.length > 0 && (
             <div className="flex gap-3">
               <button
+                onClick={() => refreshDirectories()}
+                className="flex gap-2  cursor-pointer justify-center items-center mt-4 px-4 py-2 bg-green-900 text-white text-sm rounded-lg hover:opacity-90 transition">
+                <IoRefresh size={16} />
+                Refresh
+              </button>
+              <button
                 disabled={exportPackagesLoading}
                 onClick={() => !exportPackagesLoading && exportPackages()}
                 className="relative flex gap-2 min-w-[200px] cursor-pointer justify-center items-center mt-4 px-4 py-2 bg-gray-900 text-white text-sm rounded-lg hover:opacity-90 transition"
@@ -350,7 +357,7 @@ const DirectoryList: React.FC<Props> = ({ directories, setDirectories }) => {
                     checked={selectedDirectories.includes(dir.path)}
                     title={!dir.isGitRepo || !dir.fileDiffs.length ? 'No git repository or no file diffs available' : 'Select this directory'}
                     disabled={!dir.isGitRepo || !dir.fileDiffs.length}
-                    onChange={() => directoriesCheckboxChange(dir.path)}
+                    onChange={() => dir.isGitRepo && dir.fileDiffs.length > 0 && directoriesCheckboxChange(dir.path)}
                   />
                   <div className="flex flex-col">
                     <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 text-ellipsis overflow-hidden">
