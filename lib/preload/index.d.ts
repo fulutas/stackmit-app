@@ -4,6 +4,7 @@ import type api from './api'
 declare global {
   interface Window {
     electron: ElectronAPI
-    api: typeof api
+    api: typeof api,
+    gitLib?: any
   }
 }

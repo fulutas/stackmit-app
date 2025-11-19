@@ -18,7 +18,10 @@ const api = {
   },
   openDirectory: (directoryPath: string) => {
     ipcRenderer.invoke('open-directory', directoryPath);
-  }
+  },
+  exportPackages: (directories: string[], checkLatest: boolean) => {
+    return ipcRenderer.invoke('export-packages', directories, checkLatest);
+  },
 }
 
 export default api

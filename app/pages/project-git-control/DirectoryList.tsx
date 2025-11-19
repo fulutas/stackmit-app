@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { FaGitAlt, FaFolder, FaCodeBranch } from "react-icons/fa";
-import { BiLogoVisualStudio } from "react-icons/bi";
+import { FaFolder, FaCodeBranch } from "react-icons/fa";
+import { BiLogoVisualStudio, BiPackage } from "react-icons/bi";
 import { IoLink } from "react-icons/io5";
 import { TbGitBranch } from "react-icons/tb";
 import { VscGitPullRequestNewChanges } from "react-icons/vsc";
@@ -8,7 +8,8 @@ import ProjectVersionChangesModal from "./ProjectVersionChangesModal";
 import { FiSend } from "react-icons/fi";
 import SendBatchCommitModal from "./SendBatchCommitModal";
 import { toast } from "sonner";
-import { ipcRenderer } from "electron";
+import { MoonLoader } from "react-spinners";
+import { FaXmark } from "react-icons/fa6";
 
 export interface DirectoryInfo {
   path: string;
@@ -43,6 +44,7 @@ const DirectoryList: React.FC<Props> = ({ directories, setDirectories }) => {
   const [batchCommitModalOpen, setBatchCommitModalOpen] = useState<boolean>(false);
 
   const [selectedDirectories, setSelectedDirectories] = useState<string[]>([]);
+  const [exportPackagesLoading, setExportPackagesLoading] = useState<boolean>(false);
 
   const filteredDirectories = directories.filter((dir) => {
     const matchesSearchTerm =
@@ -70,6 +72,27 @@ const DirectoryList: React.FC<Props> = ({ directories, setDirectories }) => {
     }
   }, [filterSelectAllChanged]);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'a') {
+        e.preventDefault(); // default select-all davranışını engelle
+
+        if (selectedDirectories.length === filteredDirectories.length) {
+          // Hepsi seçili → temizle
+          setSelectedDirectories([]);
+        } else {
+          // Hepsi seçili değil → tümünü seç
+          setSelectedDirectories(filteredDirectories.map(dir => dir.path));
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [filteredDirectories, selectedDirectories]);
   const directoriesCheckboxChange = (path: string) => {
     setSelectedDirectories((prev) =>
       prev.includes(path)
@@ -77,7 +100,6 @@ const DirectoryList: React.FC<Props> = ({ directories, setDirectories }) => {
         : [...prev, path] // ekle
     );
   };
-
   const openBatchCommit = () => {
     if (selectedDirectories.length === 0) {
       toast.error('Please select at least one directory.');
@@ -87,7 +109,26 @@ const DirectoryList: React.FC<Props> = ({ directories, setDirectories }) => {
     setBatchCommitModalOpen(true);
 
   }
+  const exportPackages = async () => {
+    if (selectedDirectories.length === 0) {
+      toast.error("Please select at least one directory.");
+      return;
+    }
 
+    const checkLatest = true;
+
+    setExportPackagesLoading(true)
+    toast.warning("Checking the package versions may take a little while. We will notify you when it is complete.");
+    const result = await window.api.exportPackages(selectedDirectories, checkLatest);
+
+    if (result.success) {
+      setExportPackagesLoading(false)
+      toast.success(`Excel saved to: ${result.filePath}`);
+    } else {
+      setExportPackagesLoading(false)
+      toast.error("Export failed: " + result.error);
+    }
+  };
   const sendBatchCommit = async (commitMessage: string) => {
     // ipcRenderer.send('send-commit', { directories: selectedDirectories, commitMessage });
     const directoryList = await window.gitLib.sendCommit({ directories: selectedDirectories, commitMessage });
@@ -116,12 +157,42 @@ const DirectoryList: React.FC<Props> = ({ directories, setDirectories }) => {
         <div className="flex justify-between items-baseline">
           <h1 className="w-full text-3xl text-white font-bold mb-6">Projects ({filteredDirectories.length})</h1>
           {directories.length > 0 && (
-            <button
-              onClick={() => openBatchCommit()}
-              className="flex gap-2 min-w-[200px] cursor-pointer justify-center items-center mt-4 px-4 py-2 bg-gray-900 text-white text-sm rounded-lg hover:opacity-90 transition">
-              <FiSend size={16} />
-              Send Batch Commit
-            </button>
+            <div className="flex gap-3">
+              <button
+                disabled={exportPackagesLoading}
+                onClick={() => !exportPackagesLoading && exportPackages()}
+                className="relative flex gap-2 min-w-[200px] cursor-pointer justify-center items-center mt-4 px-4 py-2 bg-gray-900 text-white text-sm rounded-lg hover:opacity-90 transition"
+              >
+                {exportPackagesLoading && selectedDirectories.length > 0 && (
+                  <span
+                    className="
+                    absolute -top-1 -left-1
+                    bg-red-600 text-white
+                    text-xs font-bold
+                    px-2 py-0.5
+                    rounded-full
+                    shadow-md
+                   "
+                  >
+                    {selectedDirectories.length}
+                  </span>
+                )}
+
+                {/* Spinner veya Icon */}
+                {exportPackagesLoading ? (
+                  <MoonLoader size={16} color="#FFFF" />
+                ) : (
+                  <BiPackage size={16} />
+                )}
+                {exportPackagesLoading ? "Exporting..." : "Export Packages"}
+              </button>
+              <button
+                onClick={() => openBatchCommit()}
+                className="flex gap-2 min-w-[200px] cursor-pointer justify-center items-center mt-4 px-4 py-2 bg-gray-900 text-white text-sm rounded-lg hover:opacity-90 transition">
+                <FiSend size={16} />
+                Send Batch Commit
+              </button>
+            </div>
           )}
         </div>
         <input
@@ -172,8 +243,24 @@ const DirectoryList: React.FC<Props> = ({ directories, setDirectories }) => {
             <div
               key={dir.path}
               data-index={index}
-              className="rounded-2xl border border-gray-200 dark:border-gray-700 p-5 shadow-md hover:shadow-lg transition-shadow bg-white dark:bg-gray-900"
+              className="relative rounded-2xl border border-gray-200 dark:border-gray-700 p-5 shadow-md hover:shadow-lg transition-shadow bg-white dark:bg-gray-900"
             >
+              <span
+                onClick={() => setDirectories(prev => prev.filter(d => d.path !== dir.path))}
+                className="
+                    absolute -top-2 -right-1
+                    bg-gray-700 text-white
+                    text-xs font-bold
+                    px-2 py-1
+                    rounded-lg
+                    shadow-md
+                    cursor-pointer
+                    hover:opacity-80
+                   "
+              >
+                <FaXmark size={14} />
+              </span>
+
               <div className="flex items-start justify-between">
                 <div className="flex gap-4">
                   <input
@@ -224,12 +311,7 @@ const DirectoryList: React.FC<Props> = ({ directories, setDirectories }) => {
                   </div>
                 </div>
                 <div className="flex flex-col items-start">
-                  {dir.isGitRepo ? (
-                    <button className="flex gap-2 items-center mt-4 px-4 py-2 w-full bg-green-600 text-white text-sm rounded-lg hover:opacity-90 transition">
-                      <FaGitAlt size={20} />
-                      Git Connected
-                    </button>
-                  ) : (
+                  {!dir.isGitRepo && (
                     <button className="flex gap-2  items-centermt-4 px-4 py-2 w-full bg-red-500 text-white text-sm rounded-lg hover:opacity-90 transition">
                       No Git Connection
                     </button>

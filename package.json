@@ -25,9 +25,12 @@
     "@electron-toolkit/preload": "^3.0.1",
     "@electron-toolkit/utils": "^4.0.0",
     "@lottiefiles/react-lottie-player": "^3.6.0",
+    "axios": "^1.13.2",
     "classnames": "^2.5.1",
+    "exceljs": "^4.4.0",
     "react-icons": "^5.5.0",
     "react-router-dom": "^6.30.0",
+    "react-spinners": "^0.17.0",
     "sonner": "^2.0.3"
   },
   "devDependencies": {

@@ -1,4 +1,4 @@
-import { BrowserWindow, shell, app, screen, dialog, ipcMain } from 'electron'
+import { BrowserWindow, shell, app, screen, dialog, ipcMain, Notification } from 'electron'
 import path from 'path'
 import { registerWindowIPC } from '@/lib/window/ipcEvents'
 import appIcon from '@/resources/build/icon.png?asset'
@@ -6,12 +6,15 @@ import fs from "fs"
 import util from 'util'
 import { exec } from 'child_process'
 import { installExtension, REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer';
+import ExcelJS from "exceljs";
+import * as os from "os";
 
 let mainWindow;
 const execPromise = util.promisify(exec);
 
 export function createAppWindow(): void {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
+
 
   mainWindow = new BrowserWindow({
     width: width,
@@ -166,7 +169,7 @@ ipcMain.handle('select-directories', async () => {
 ipcMain.handle('send-commit', async (_, payload) => {
   const { directories, commitMessage } = payload || {};
 
-  const results = [];
+  const results = [] as any[];
   console.log("send-commit", directories)
   for (const dir of directories) {
     try {
@@ -185,6 +188,8 @@ ipcMain.handle('send-commit', async (_, payload) => {
         success: true,
         message: 'Commit ve push başarılı'
       });
+      new Notification({ title: "Stackmit - Commit & Push Success", body: "Commit and push completed successfully" }).show()
+
     } catch (error) {
       results.push({
         path: dir,
@@ -205,4 +210,89 @@ ipcMain.handle('open-in-vscode', async (_, directoryPath) => {
 
 ipcMain.handle('open-directory', async (_, directoryPath) => {
   await shell.openPath(directoryPath);
+});
+
+ipcMain.handle("export-packages", async (_, directories, checkLatest) => {
+  const axios = require("axios");
+  const desktopPath = path.join(os.homedir(), "Desktop");
+
+  async function getLatestVersion(pkgName) {
+    try {
+      const url = `https://registry.npmjs.org/${pkgName}`;
+      const response = await axios.get(url);
+
+      return response.data?.["dist-tags"]?.latest || null;
+    } catch (err) {
+      return null;
+    }
+  }
+
+  function normalizeVersion(v) {
+    return v?.replace(/^[~^]/, "");
+  }
+
+  try {
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet("Dependencies");
+
+    // Kolonlar (checkLatest true ise ek kolonlar gelir)
+    const header = ["Project Name", "Package", "Version", "Type"];
+
+    if (checkLatest) {
+      header.splice(3, 0, "NPM Latest Version", "Up to Date");
+    }
+
+    sheet.addRow(header);
+
+    for (const dirPath of directories) {
+      const packageJsonPath = path.join(dirPath, "package.json");
+
+      if (!fs.existsSync(packageJsonPath)) continue;
+
+      const pkg = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
+      const projectName = pkg.name || path.basename(dirPath);
+
+      const addRows = async (deps, type) => {
+        for (const [pkgName, version] of Object.entries(deps)) {
+          let latest = null;
+          let isLatest = null as any;
+
+          if (checkLatest) {
+            latest = await getLatestVersion(pkgName);
+            isLatest =
+              latest && normalizeVersion(latest) === normalizeVersion(version)
+                ? "Yes"
+                : "No";
+          }
+
+          const row = [projectName, pkgName, version];
+
+          if (checkLatest) {
+            row.push(latest ?? "Not found.", isLatest);
+          }
+
+          row.push(type);
+
+          sheet.addRow(row);
+        }
+      };
+
+      if (pkg.dependencies) await addRows(pkg.dependencies, "dependency");
+      if (pkg.devDependencies) await addRows(pkg.devDependencies, "devDependency");
+    }
+
+    const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+    const filePath = path.join(
+      desktopPath,
+      `Stackmit-Packages-${timestamp}.xlsx`
+    );
+
+    await workbook.xlsx.writeFile(filePath);
+    new Notification({ title: "Stackmit - Packages Export Success", body: "Excel saved to desktop." }).show()
+
+    return { success: true, filePath };
+  } catch (error: any) {
+    console.error("Export Packages Error:", error);
+    return { success: false, error: error.message };
+  }
 });
