@@ -40,13 +40,13 @@ const SendBatchCommitModal: React.FC<SendBatchCommitModalProps> = ({
         <div className="flex justify-end gap-2">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-sm bg-gray-300 dark:bg-gray-700 rounded-md hover:opacity-80"
+            className="px-4 py-2 text-sm bg-gray-300 cursor-pointer dark:bg-gray-700 rounded-md hover:opacity-80"
           >
             Cancel
           </button>
           <button
             onClick={handleSubmit}
-            className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            className="px-4 py-2 text-sm cursor-pointer bg-blue-600 text-white rounded-md hover:bg-blue-700"
           >
             Send Commit
           </button>

@@ -3,10 +3,10 @@ import Modal from '@/app/components/Modal';
 import { DirectoryInfo } from './DirectoryList';
 
 interface ProjectVersionChangesModalProps {
-  changeModalDetail: DirectoryInfo | null;
+  changeModalDetail: DirectoryInfo | any;
   changeModalOpen: boolean;
   setChangeModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  setChangeModalDetail: React.Dispatch<React.SetStateAction<DirectoryInfo | null>>;
+  setChangeModalDetail: React.Dispatch<React.SetStateAction<DirectoryInfo | Object | null>>
 }
 
 const ProjectVersionChangesModal: React.FC<ProjectVersionChangesModalProps> = ({

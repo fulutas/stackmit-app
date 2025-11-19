@@ -67,9 +67,9 @@ ipcMain.handle('select-directories', async () => {
     properties: ['openDirectory', 'multiSelections']
   });
 
-  if (result.canceled) {
-    return [];
-  }
+  // if (result.canceled) {
+  //   return [];
+  // }
 
   console.log(result)
 

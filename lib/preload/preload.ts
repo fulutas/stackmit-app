@@ -11,7 +11,10 @@ if (process.contextIsolated) {
     contextBridge.exposeInMainWorld('api', api)
     contextBridge.exposeInMainWorld('gitLib', {
       selectDirectories: () => ipcRenderer.invoke('select-directories'),
+      refreshDirectories: (directories) => ipcRenderer.invoke('refresh-directories', directories),
       sendCommit: (payload) => ipcRenderer.invoke('send-commit', payload),
+      repoCheckUpdates: (dirPath) => ipcRenderer.invoke('repo-check-updates', dirPath),
+      gitPull: (dirPath) => ipcRenderer.invoke('git-pull', dirPath),
     });
   } catch (error) {
     console.error(error)
