@@ -24,7 +24,7 @@ const router = createHashRouter([
 
 ReactDOM.createRoot(document.getElementById('app') as HTMLElement).render(
   <WindowContextProvider titlebar={{ title: 'Stackmit', icon: appIcon, menuItems }}>
-    <Toaster richColors position="top-right" />
+    <Toaster richColors position="top-center" />
     <RouterProvider router={router} />
   </WindowContextProvider>
 )

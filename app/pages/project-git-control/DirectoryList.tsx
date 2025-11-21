@@ -199,10 +199,10 @@ const DirectoryList: React.FC<Props> = ({ directories, setDirectories }) => {
       setDirectories((prev) =>
         prev.map((dir) => (dir.path === updatedDir.path ? updatedDir : dir))
       );
-      toast.success(`${dirPath.split('/').pop()} repository updated successfully.`);
+      toast.success(`${dirPath.split('/').pop()}\nrepository updated successfully.`);
     } catch (error) {
       console.error('Error checking repository updates:', error);
-      toast.error(`${dirPath.split('/').pop()} repository update failed.`);
+      toast.error(`${dirPath.split('/').pop()}\nrepository update failed.`);
     }
   };
 
@@ -232,10 +232,10 @@ const DirectoryList: React.FC<Props> = ({ directories, setDirectories }) => {
       setDirectories((prev) =>
         prev.map((dir) => (dir.path === resGitPull.path ? resGitPull : dir))
       );
-      toast.success(`${dirPath.split('/').pop()} repository pulled successfully.`);
+      toast.success(`${dirPath.split('/').pop()}\nrepository pulled successfully.`);
     } catch (error) {
       console.error('Error checking repository updates:', error);
-      toast.error(`${dirPath.split('/').pop()} repository pull failed.`);
+      toast.error(`${dirPath.split('/').pop()}\nrepository pull failed.`);
     }
   };
 
@@ -319,7 +319,7 @@ const DirectoryList: React.FC<Props> = ({ directories, setDirectories }) => {
                   onChange={() => setFilterGitRepo(!filterGitRepo)}
                   className="text-blue-500"
                 />
-                Git Connected
+                Connected
               </label>
               <label className="flex items-center gap-2 text-white cursor-pointer">
                 <input
@@ -338,7 +338,6 @@ const DirectoryList: React.FC<Props> = ({ directories, setDirectories }) => {
         {/* DirectoriesList */}
         <div className="directories-list space-y-4">
           {filteredDirectories.length > 0 && filteredDirectories.map((dir, index) => {
-            console.log("dir", dir)
             return (
               <div
                 key={dir.path}
@@ -384,7 +383,7 @@ const DirectoryList: React.FC<Props> = ({ directories, setDirectories }) => {
                         <div className="mt-5 space-y-1">
                           <div className="flex gap-1 text-sm">
                             <span className="font-medium flex gap-1 items-center"> <FaGit /> Remote Status: </span>
-                            <label className={classNames('text-sm font-medium', { 'text-green-500': dir.isGitRepo, 'text-red-500': !dir.isGitRepo })}>{dir.isGitRepo ? "Git Connected" : "No Git Connection"}</label>
+                            <label className={classNames('text-sm font-medium', { 'text-green-500': dir.isGitRepo, 'text-red-500': !dir.isGitRepo })}>{dir.isGitRepo ? "Connected" : "No Git Connection"}</label>
                           </div>
                           <div className="flex gap-1 text-sm">
                             <span className="font-medium flex gap-1 items-center"> <FaCodeBranch /> Current Branch: </span>
@@ -421,20 +420,41 @@ const DirectoryList: React.FC<Props> = ({ directories, setDirectories }) => {
                         No Git Connection
                       </button>
                     )}
-                    <button
-                      onClick={() => window.api.openInVSCode(dir.path)}
-                      className="flex gap-2 items-center px-4 py-2 w-full cursor-pointer bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-700 transition"
-                    >
-                      <BiLogoVisualStudio />
-                      Open VSCode
-                    </button>
+                    <div className="relative inline-block text-left group">
+                      {/* Ana buton */}
+                      <button className="flex gap-2 items-center px-4 py-2 w-full cursor-pointer bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-700 transition">
+                        <BiLogoVisualStudio size={18} />
+                        Open Editor
+                      </button>
+
+                      {/* Dropdown */}
+                      <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-50 opacity-0 invisible group-hover:visible group-hover:opacity-100 transition-all duration-200">
+                        <div className="py-1">
+                          <button
+                            onClick={() => window.api.openInVSCode(dir.path)}
+                            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 cursor-pointer dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                          >
+                            <BiLogoVisualStudio size={16} />
+                            Open VSCode
+                          </button>
+
+                          <button
+                            onClick={() => window.api.openInVisualStudio(dir.path)}
+                            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 cursor-pointer dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                          >
+                            <BiLogoVisualStudio size={16} />
+                            Open Visual Studio
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                     {dir.pendingChanges && (
                       <button
                         onClick={() => {
                           setChangeModalDetail(dir)
                           setChangeModalOpen(true)
                         }}
-                        className="flex gap-2 items-center mt-4 px-4 py-2 w-full cursor-pointer bg-yellow-600 text-white text-sm rounded-lg hover:bg-yellow-700 transition"
+                        className="flex gap-2 items-center mt-4 px-4 py-2 w-full cursor-pointer bg-orange-600 text-white text-sm rounded-lg hover:bg-orange-700 transition"
                       >
                         <VscGitPullRequestNewChanges />
                         My Local Changes

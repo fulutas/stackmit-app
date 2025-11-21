@@ -247,6 +247,32 @@ ipcMain.handle('open-in-vscode', async (_, directoryPath) => {
   exec(`code "${directoryPath}"`);
 });
 
+ipcMain.handle('open-in-visualstudio', async (_, directoryPath) => {
+  const { exec } = require('child_process');
+
+  // Visual Studio yolları (2022)
+  const possiblePaths = [
+    'C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\devenv.exe',
+    'C:\\Program Files\\Microsoft Visual Studio\\2022\\Professional\\Common7\\IDE\\devenv.exe',
+    'C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\Common7\\IDE\\devenv.exe',
+  ];
+
+  const fs = require('fs');
+
+  const devenvPath = possiblePaths.find((p) => fs.existsSync(p));
+
+  if (!devenvPath) {
+    return {
+      success: false,
+      message: "Visual Studio 2022 bulunamadı. Yol sistemde yok."
+    };
+  }
+
+  exec(`"${devenvPath}" "${directoryPath}"`);
+
+  return { success: true };
+});
+
 ipcMain.handle('open-directory', async (_, directoryPath) => {
   await shell.openPath(directoryPath);
 });

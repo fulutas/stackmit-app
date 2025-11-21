@@ -16,6 +16,7 @@ const api = {
   openInVSCode: (directoryPath: string) => {
     ipcRenderer.invoke('open-in-vscode', directoryPath);
   },
+  openInVisualStudio: (path) => ipcRenderer.invoke('open-in-visualstudio', path),
   openDirectory: (directoryPath: string) => {
     ipcRenderer.invoke('open-directory', directoryPath);
   },
