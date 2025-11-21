@@ -180,7 +180,6 @@ const DirectoryList: React.FC<Props> = ({ directories, setDirectories }) => {
   const repoCheckUpdates = async (dirPath: string) => {
     try {
       const updatedDir = await window.gitLib.repoCheckUpdates(dirPath);
-      console.log(updatedDir)
       // Eğer güncel ve değişiklik yoksa buton yazısını değiştir
       if (updatedDir.success && updatedDir.count === 0) {
         setRepoRefreshStatus((prev) => ({ ...prev, [dirPath]: 'Up to date' }));
