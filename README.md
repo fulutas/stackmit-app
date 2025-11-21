@@ -5,20 +5,25 @@
     <img src="resources/build/icon.svg" width="64" />
 </p> -->
 
-🚀 A simple tool to analyze, commit, and push changes across multiple Git repositories.  
-Perfect for managing microservices, monorepos, or grouped Git projects.
+🚀 Stackmit is a desktop application designed to help developers manage multiple projects and Git repositories from a single, centralized interface. Its main goal is to enable micro frontend projects to manage Git statuses and package dependencies under a single roof. The application allows users to track updates, file changes, and dependency versions quickly and visually, simplifying project maintenance and collaboration.
 
 <!-- <br /> -->
 
 ## Overview
 
-- 🔍 Detect Git changes across multiple project folders
-- ✅ Stage and commit changes with a custom message
-- 🚀 Push commits to remote repositories (optional)
-- ⚡ Save time managing multiple related repositories
-- 🌲 Batch commit to multiple Git repositories
-- 🧠 Detects if a repo has changes before committing
-- 📝 Custom commit messages
+- View all project directories and their Git status in one place.
+
+- Monitor pending changes and commits for each repository.
+
+- Open projects in VSCode or Visual Studio directly from the app.
+
+- Export package dependencies to Excel, with optional NPM latest version checks.
+
+- Batch commit multiple repositories at once.
+
+- Filter projects by Git status, pending changes, or search terms.
+
+- Modal interface to inspect detailed file changes and commit history.
 
 ## Features
 
@@ -28,7 +33,6 @@ Perfect for managing microservices, monorepos, or grouped Git projects.
 - 🎨 TailwindCSS - Utility-first CSS framework
 - ⚡ Vite - Lightning-fast build tool
 - 🔥 Fast HMR - Hot Module Replacement
-- 🎨 Dark/Light Mode - Built-in theme switching
 - 🪟 Custom Window & Titlebar - Professional-looking window with custom titlebar & file menus.
 - 📐 Clean Project Structure - Separation of main and renderer processes
 - 🧩 Path Aliases – Keep your code organized.
@@ -177,36 +181,4 @@ Contributions are welcome! Feel free to submit a Pull Request.
 
 <br />
 
-## Project Structure
-
-<!-- prettier-ignore-start -->
-```markdown
-├── app/                        # Renderer process files
-│   ├── assets/                 # Static assets (images, fonts, etc)
-│   ├── components/             # React components
-│   │   ├── App.tsx             # Application component
-│   ├── styles/                 # CSS and Tailwind files
-│   │   ├── app.css             # App stylesheet
-│   │   └── tailwind.css        # Tailwind stylesheet
-│   ├── index.html              # Entry HTML file
-│   └── renderer.tsx            # Renderer process entry
-├── lib/                        # Shared library code
-│   ├── main/                   # Main process code
-│   │   ├── index.ts            # Main entry point for Electron
-│   │   └── ...                 # Other main process modules
-│   ├── preload/                # Preload scripts for IPC
-│   │   ├── index.ts            # Preload script entry
-│   │   └── api.ts              # Exposed API for renderer
-│   ├── welcome/                # Welcome kit components
-│   └── window/                 # Custom window implementation
-├── resources/                  # Build resources
-├── .eslintrc                   # ESLint configuration
-├── .prettierrc                 # Prettier format configuration
-├── electron-builder.yml        # Electron builder configuration
-├── electron.vite.config.ts     # Vite configuration for Electron
-├── package.json                # Project dependencies and scripts
-└── tsconfig.node.json          # Main process tsconfig
-└── tsconfig.web.json           # Renderer process tsconfig
-
-```
 <!-- prettier-ignore-end -->
