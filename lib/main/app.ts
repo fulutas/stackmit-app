@@ -353,7 +353,17 @@ ipcMain.handle("export-packages", async (_, directories, checkLatest) => {
     );
 
     await workbook.xlsx.writeFile(filePath);
-    new Notification({ title: "Stackmit - Packages Export Success", body: "Excel saved to desktop." }).show()
+
+    const notif = new Notification({
+      title: "Stackmit - Packages Export Success",
+      body: "Excel saved to desktop."
+    });
+
+    notif.on("click", () => {
+      shell.openPath(filePath); // Default app will open
+    });
+
+    notif.show();
 
     return { success: true, filePath };
   } catch (error: any) {

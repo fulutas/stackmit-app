@@ -364,11 +364,11 @@ const DirectoryList: React.FC<Props> = ({ directories, setDirectories }) => {
                   <div className="flex gap-4">
                     <input
                       type="checkbox"
-                      className={classNames('mt-1 border cursor-pointer accent-blue-600 w-5 h-5', { 'opacity-40 !cursor-not-allowed': !dir.isGitRepo || !dir.fileDiffs.length })}
+                      className={classNames('mt-1 border cursor-pointer accent-blue-600 w-5 h-5', { 'opacity-40 !cursor-not-allowed': !dir.isGitRepo })}
                       checked={selectedDirectories.includes(dir.path)}
-                      title={!dir.isGitRepo || !dir.fileDiffs.length ? 'No git repository or no file diffs available' : 'Select this directory'}
-                      disabled={!dir.isGitRepo || !dir.fileDiffs.length}
-                      onChange={() => dir.isGitRepo && dir.fileDiffs.length > 0 && directoriesCheckboxChange(dir.path)}
+                      title={!dir.isGitRepo ? 'No git repository or no file diffs available' : 'Select this directory'}
+                      disabled={!dir.isGitRepo}
+                      onChange={() => dir.isGitRepo && directoriesCheckboxChange(dir.path)}
                     />
                     <div className="flex flex-col">
                       <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 text-ellipsis overflow-hidden">
