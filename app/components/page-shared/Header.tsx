@@ -1,10 +1,14 @@
 import React, { useState } from 'react'
+import { BiInfoSquare } from 'react-icons/bi';
+import { FaInfo } from 'react-icons/fa';
 import { NavLink } from 'react-router-dom';
+import AppInformationModal from '../AppInformationModal';
 
 type Props = {}
 
 const Header = (props: Props) => {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [appInformationModalOpen, setAppInformationModalOpen] = useState<boolean>(false);
 
   const getLinkClass = ({ isActive }) => {
     return isActive
@@ -59,9 +63,9 @@ const Header = (props: Props) => {
               <NavLink to="/project-git-control" className={getLinkClass}>
                 <span>Project Git Control</span>
               </NavLink>
-              <NavLink to="/profile" className={getLinkClass}>
+              {/* <NavLink to="/profile" className={getLinkClass}>
                 <span>Profile</span>
-              </NavLink>
+              </NavLink> */}
             </nav>
             {/* END Desktop Navigation */}
           </div>
@@ -69,28 +73,12 @@ const Header = (props: Props) => {
 
           {/* Right Section */}
           <div className="flex items-center gap-2">
-            {/* Notifications */}
-            <a
-              href="#"
-              className="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm leading-5 font-semibold text-gray-800 hover:border-gray-300 hover:text-gray-900 hover:shadow-xs focus:ring-3 focus:ring-gray-300/25 active:border-gray-200 active:shadow-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-200 dark:focus:ring-gray-600/40 dark:active:border-gray-700"
+            <span
+              onClick={() => setAppInformationModalOpen(true)}
+              className="inline-flex items-center justify-center gap-2 cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm leading-5 font-semibold text-gray-800 hover:border-gray-300 hover:text-gray-900 hover:shadow-xs focus:ring-3 focus:ring-gray-300/25 active:border-gray-200 active:shadow-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-200 dark:focus:ring-gray-600/40 dark:active:border-gray-700"
             >
-              <svg
-                className="hi-outline hi-bell-alert inline-block size-5"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth="1.5"
-                stroke="currentColor"
-                aria-hidden="true"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0M3.124 7.5A8.969 8.969 0 015.292 3m13.416 0a8.969 8.969 0 012.168 4.5"
-                />
-              </svg>
-            </a>
-            {/* END Notifications */}
+              <FaInfo />
+            </span>
 
             {/* Toggle Mobile Navigation */}
             <div className="lg:hidden">
@@ -124,13 +112,20 @@ const Header = (props: Props) => {
             <NavLink to="/project-git-control" className="group flex items-center gap-2 rounded-lg border border-blue-50 bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-600 dark:border-transparent dark:bg-gray-700/75 dark:text-white" >
               <span>Project Git Control</span>
             </NavLink>
-            <NavLink to="/profile" className="group flex items-center gap-2 rounded-lg border border-transparent px-3 py-2 text-sm font-medium text-gray-800 hover:bg-blue-50 hover:text-blue-600 active:border-blue-100 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-white dark:active:border-gray-600">
+            {/* <NavLink to="/profile" className="group flex items-center gap-2 rounded-lg border border-transparent px-3 py-2 text-sm font-medium text-gray-800 hover:bg-blue-50 hover:text-blue-600 active:border-blue-100 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-white dark:active:border-gray-600">
               <span>Profile</span>
-            </NavLink>
+            </NavLink> */}
           </nav>
         </div>
         {/* END Mobile Navigation */}
       </div>
+
+      {appInformationModalOpen && (
+        <AppInformationModal
+          isOpen={appInformationModalOpen}
+          onClose={() => setAppInformationModalOpen(false)}
+        />
+      )}
     </header>
   )
 }
