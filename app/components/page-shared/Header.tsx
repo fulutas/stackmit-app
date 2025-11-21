@@ -31,7 +31,7 @@ const Header = (props: Props) => {
                 <circle cx="5" cy="10" r="2" fill="#155dfc" />
                 <circle cx="5" cy="16" r="2" fill="#155dfc" />
 
-                <path d="M5 4L12 4C13.1046 4 14 4.89543 14 6V14C14 15.1046 13.1046 16 12 16H5" stroke="#155dfc" stroke-width="1.5" />
+                <path d="M5 4L12 4C13.1046 4 14 4.89543 14 6V14C14 15.1046 13.1046 16 12 16H5" stroke="#155dfc" strokeWidth="1.5" />
 
                 <circle cx="14" cy="6" r="1.5" fill="#155dfc" />
               </svg>

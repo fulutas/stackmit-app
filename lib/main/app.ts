@@ -78,11 +78,12 @@ ipcMain.handle('select-directories', async () => {
     try {
       const isGitRepo = fs.existsSync(path.join(dirPath, '.git'));
 
-      let pendingChanges = '';
-      let gitRemoteUrl = '';
-      let currentBranch = '';
-      let allBranches = [];
-      let fileDiffs = [];
+      let pendingChanges = '' as any;
+      let gitRemoteUrl = '' as any;
+      let currentBranch = '' as any;
+      let allBranches = [] as any[];
+      let fileDiffs = [] as any[];
+      let newCommitDetails = [] as any[];
 
       if (isGitRepo) {
         try {
@@ -123,7 +124,7 @@ ipcMain.handle('select-directories', async () => {
                 status,
                 diff: diffOutput.trim()
               });
-            } catch (diffError) {
+            } catch (diffError: any) {
               console.error(`Diff alınamadı: ${diffError.message}`);
               fileDiffs.push({
                 filePath: file,
@@ -133,6 +134,43 @@ ipcMain.handle('select-directories', async () => {
               });
             }
           }
+
+          // 🔥 Commit info
+          const { stdout: behindLog } = await execPromise(
+            `git log HEAD..origin/${currentBranch} --pretty=format:"%H|%h|%an|%ae|%ad|%s"`,
+            { cwd: dirPath }
+          );
+
+          const commits = behindLog
+            .trim()
+            .split("\n")
+            .filter(Boolean)
+            .map(line => {
+              const [hash, shortHash, author, email, date, message] = line.split("|");
+              return { hash, shortHash, author, email, date, message };
+            });
+
+          for (const commit of commits) {
+            const { stdout: commitDiff } = await execPromise(
+              `git show --name-status --pretty=format:"" ${commit.hash}`,
+              { cwd: dirPath, maxBuffer: 1024 * 1024 * 50 } // 50MB buffer
+            );
+
+            const files = commitDiff
+              .trim()
+              .split("\n")
+              .filter(Boolean)
+              .map(line => {
+                const [status, filePath] = line.split(/\s+/);
+                return { status, filePath };
+              });
+
+            commit.files = files;
+
+            newCommitDetails.push(commit)
+
+          }
+
 
         } catch (error) {
           console.error(`Git komut hatası: ${(error as Error).message}`);
@@ -147,7 +185,8 @@ ipcMain.handle('select-directories', async () => {
         gitRemoteUrl,
         currentBranch,
         allBranches,
-        fileDiffs
+        fileDiffs,
+        newCommitDetails
       };
     } catch (error) {
       console.error(`Dizin kontrolünde hata: ${(error as Error).message}`);
@@ -308,24 +347,79 @@ ipcMain.handle('git-pull', async (_, dirPath) => {
 
 ipcMain.handle('repo-check-updates', async (_, dirPath) => {
   try {
-    // Fetch yap
+    // Fetch
     await execPromise('git fetch', { cwd: dirPath });
 
-    // Geçerli branch adını al
-    const { stdout: branchStdout } = await execPromise('git rev-parse --abbrev-ref HEAD', { cwd: dirPath });
+    // Aktif branch
+    const { stdout: branchStdout } = await execPromise(
+      'git rev-parse --abbrev-ref HEAD',
+      { cwd: dirPath }
+    );
     const currentBranch = branchStdout.trim();
 
-    // Uzakta kaç yeni commit olduğunu al
-    const { stdout: countStdout } = await execPromise(`git rev-list HEAD..origin/${currentBranch} --count`, {
-      cwd: dirPath
-    });
+    // Ne kadar commit önde?
+    const { stdout: countStdout } = await execPromise(
+      `git rev-list HEAD..origin/${currentBranch} --count`,
+      { cwd: dirPath }
+    );
 
     const aheadCount = parseInt(countStdout.trim(), 10);
 
+    // Dosya değişiklikleri
+    const { stdout: diffFilesStdout } = await execPromise(
+      `git diff --name-status origin/${currentBranch}..HEAD`,
+      { cwd: dirPath }
+    );
+
+    const changedFiles = diffFilesStdout
+      .trim()
+      .split("\n")
+      .filter(Boolean)
+      .map(line => {
+        const [status, filePath] = line.split(/\s+/);
+        return { status, filePath };
+      });
+
+    // 🔥 Commit info
+    const { stdout: behindLog } = await execPromise(
+      `git log HEAD..origin/${currentBranch} --pretty=format:"%H|%h|%an|%ae|%ad|%s"`,
+      { cwd: dirPath }
+    );
+
+    const commits = behindLog
+      .trim()
+      .split("\n")
+      .filter(Boolean)
+      .map(line => {
+        const [hash, shortHash, author, email, date, message] = line.split("|");
+        return { hash, shortHash, author, email, date, message };
+      });
+
+    for (const commit of commits) {
+      const { stdout: commitDiff } = await execPromise(
+        `git show --name-status --pretty=format:"" ${commit.hash}`,
+        { cwd: dirPath, maxBuffer: 1024 * 1024 * 50 } // 50MB buffer
+      );
+
+      const files = commitDiff
+        .trim()
+        .split("\n")
+        .filter(Boolean)
+        .map(line => {
+          const [status, filePath] = line.split(/\s+/);
+          return { status, filePath };
+        });
+
+      commit.files = files;
+    }
+
     return {
       success: true,
-      count: aheadCount
+      count: aheadCount,
+      changedFiles,
+      newCommitDetails: commits,
     };
+
   } catch (error) {
     return {
       success: false,
@@ -341,11 +435,12 @@ ipcMain.handle('refresh-directories', async (_, directories: string[]) => {
     try {
       const isGitRepo = fs.existsSync(path.join(dirPath, '.git'));
 
-      let pendingChanges = '';
-      let gitRemoteUrl = '';
-      let currentBranch = '';
-      let allBranches = [];
-      let fileDiffs = [];
+      let pendingChanges = '' as any;
+      let gitRemoteUrl = '' as any;
+      let currentBranch = '' as any;
+      let allBranches = [] as any[];
+      let fileDiffs = [] as any[];
+      let newCommitDetails = [] as any[];
 
       if (isGitRepo) {
         try {
@@ -381,7 +476,7 @@ ipcMain.handle('refresh-directories', async (_, directories: string[]) => {
                 status,
                 diff: diffOutput.trim()
               });
-            } catch (diffError) {
+            } catch (diffError: any) {
               fileDiffs.push({
                 filePath: file,
                 status,
@@ -389,6 +484,42 @@ ipcMain.handle('refresh-directories', async (_, directories: string[]) => {
                 error: diffError.message
               });
             }
+          }
+
+          // 🔥 Commit info
+          const { stdout: behindLog } = await execPromise(
+            `git log HEAD..origin/${currentBranch} --pretty=format:"%H|%h|%an|%ae|%ad|%s"`,
+            { cwd: dirPath }
+          );
+
+          const commits = behindLog
+            .trim()
+            .split("\n")
+            .filter(Boolean)
+            .map(line => {
+              const [hash, shortHash, author, email, date, message] = line.split("|");
+              return { hash, shortHash, author, email, date, message };
+            });
+
+          for (const commit of commits) {
+            const { stdout: commitDiff } = await execPromise(
+              `git show --name-status --pretty=format:"" ${commit.hash}`,
+              { cwd: dirPath, maxBuffer: 1024 * 1024 * 50 } // 50MB buffer
+            );
+
+            const files = commitDiff
+              .trim()
+              .split("\n")
+              .filter(Boolean)
+              .map(line => {
+                const [status, filePath] = line.split(/\s+/);
+                return { status, filePath };
+              });
+
+            commit.files = files;
+
+            newCommitDetails.push(commit)
+
           }
         } catch (error) {
           console.error(`Git error: ${(error as Error).message}`);
@@ -403,7 +534,8 @@ ipcMain.handle('refresh-directories', async (_, directories: string[]) => {
         gitRemoteUrl,
         currentBranch,
         allBranches,
-        fileDiffs
+        fileDiffs,
+        newCommitDetails
       };
     } catch (error) {
       return {
