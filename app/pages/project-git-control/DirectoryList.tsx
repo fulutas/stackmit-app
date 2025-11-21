@@ -180,7 +180,7 @@ const DirectoryList: React.FC<Props> = ({ directories, setDirectories }) => {
   const repoCheckUpdates = async (dirPath: string) => {
     try {
       const updatedDir = await window.gitLib.repoCheckUpdates(dirPath);
-
+      console.log(updatedDir)
       // Eğer güncel ve değişiklik yoksa buton yazısını değiştir
       if (updatedDir.success && updatedDir.count === 0) {
         setRepoRefreshStatus((prev) => ({ ...prev, [dirPath]: 'Up to date' }));
@@ -210,7 +210,12 @@ const DirectoryList: React.FC<Props> = ({ directories, setDirectories }) => {
     try {
       const resGitPull = await window.gitLib.gitPull(dirPath);
 
-      // Eğer güncel ve değişiklik yoksa buton yazısını değiştir
+      if (resGitPull.conflict) {
+        toast.error(`${dirPath.split('/').pop()}\n conflict detected! open your editor to resolve the conflicts.`);
+
+        return;
+      }
+
       if (resGitPull.success) {
         setRepoGitPullStatus((prev) => ({ ...prev, [dirPath]: 'Pull success' }));
 
@@ -234,7 +239,6 @@ const DirectoryList: React.FC<Props> = ({ directories, setDirectories }) => {
       );
       toast.success(`${dirPath.split('/').pop()}\nrepository pulled successfully.`);
     } catch (error) {
-      console.error('Error checking repository updates:', error);
       toast.error(`${dirPath.split('/').pop()}\nrepository pull failed.`);
     }
   };
@@ -338,6 +342,7 @@ const DirectoryList: React.FC<Props> = ({ directories, setDirectories }) => {
         {/* DirectoriesList */}
         <div className="directories-list space-y-4">
           {filteredDirectories.length > 0 && filteredDirectories.map((dir, index) => {
+            console.log("line dir", dir)
             return (
               <div
                 key={dir.path}

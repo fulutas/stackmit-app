@@ -375,9 +375,39 @@ ipcMain.handle("export-packages", async (_, directories, checkLatest) => {
 ipcMain.handle('git-pull', async (_, dirPath) => {
   try {
     await execPromise('git pull', { cwd: dirPath });
-    return { success: true };
+
+    return { success: true, conflict: false };
   } catch (error) {
-    return { success: false, message: (error as Error).message };
+    // Conflict var mı kontrol et
+    try {
+      const { stdout } = await execPromise(
+        'git diff --name-only --diff-filter=U',
+        { cwd: dirPath }
+      );
+
+      const conflictFiles = stdout
+        .trim()
+        .split("\n")
+        .filter(Boolean);
+
+      if (conflictFiles.length > 0) {
+        return {
+          success: false,
+          conflict: true,
+          conflictFiles,
+          message: "Merge conflict detected."
+        };
+      }
+    } catch (err) {
+      // diff komutu da hata verirse ignore
+    }
+
+    // Conflict değilse pull hatasını döndür
+    return {
+      success: false,
+      conflict: false,
+      message: (error as Error).message
+    };
   }
 });
 
