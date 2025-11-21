@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { FaFolder, FaCodeBranch, FaGit, FaCheck } from "react-icons/fa";
-import { BiLogoVisualStudio, BiPackage } from "react-icons/bi";
+import { BiLogoVisualStudio, BiPackage, BiUpArrow } from "react-icons/bi";
 import { IoLink, IoRefresh } from "react-icons/io5";
-import { TbGitBranch } from "react-icons/tb";
+import { TbFolderCheck, TbGitBranch } from "react-icons/tb";
 import { VscGitPullRequestGoToChanges, VscGitPullRequestNewChanges } from "react-icons/vsc";
 import ProjectVersionChangesModal from "./ProjectVersionChangesModal";
 import { FiSend } from "react-icons/fi";
@@ -12,7 +12,7 @@ import { MoonLoader } from "react-spinners";
 import { FaCodePullRequest, FaXmark } from "react-icons/fa6";
 import classNames from "classnames";
 import NewCommitChangesModal from "./NewCommitChangesModal";
-
+import { motion } from "framer-motion";
 export interface DirectoryInfo {
   path: string;
   name: string;
@@ -342,7 +342,7 @@ const DirectoryList: React.FC<Props> = ({ directories, setDirectories }) => {
         {/* DirectoriesList */}
         <div className="directories-list space-y-4">
           {filteredDirectories.length > 0 && filteredDirectories.map((dir, index) => {
-            console.log("line dir", dir)
+
             return (
               <div
                 key={dir.path}
@@ -350,7 +350,10 @@ const DirectoryList: React.FC<Props> = ({ directories, setDirectories }) => {
                 className="relative rounded-2xl border border-gray-200 dark:border-gray-700 p-5 shadow-md hover:shadow-lg transition-shadow bg-white dark:bg-gray-900"
               >
                 <span
-                  onClick={() => setDirectories(prev => prev.filter(d => d.path !== dir.path))}
+                  onClick={() => {
+                    setDirectories(prev => prev.filter(d => d.path !== dir.path))
+                    setSelectedDirectories(prev => prev.filter(d => d !== dir.path))
+                  }}
                   className="
                       absolute -top-2 -right-1
                       bg-gray-700 text-white
@@ -421,7 +424,7 @@ const DirectoryList: React.FC<Props> = ({ directories, setDirectories }) => {
                   </div>
                   <div className="flex flex-col items-start">
                     {!dir.isGitRepo && (
-                      <button className="flex gap-2  items-centermt-4 px-4 py-2 w-full bg-red-500 text-white text-sm rounded-lg hover:opacity-90 transition">
+                      <button className="flex gap-2 mb-2 items-centermt-4 px-4 py-2 w-full bg-red-500 text-white text-sm rounded-lg hover:opacity-90 transition">
                         No Git Connection
                       </button>
                     )}
@@ -482,39 +485,43 @@ const DirectoryList: React.FC<Props> = ({ directories, setDirectories }) => {
                 <hr className="mt-5 mb-5 h-0.5 border-t-0 bg-neutral-100 dark:bg-white/10" />
                 {/* Git Actions */}
                 <div className="git-actions flex flex-col mt-4">
-                  <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">Git Actions</h3>
-                  <div className="flex flex-row gap-2">
-                    <button
-                      onClick={() => repoCheckUpdates(dir.path)}
-                      className={classNames(
-                        "flex gap-2 cursor-pointer justify-center items-center px-4 py-2 text-white text-sm rounded-lg transition bg-gray-700 hover:opacity-90",
-                        repoRefreshStatus[dir.path] === 'Up to date' && "bg-green-600 hover:bg-green-700",
-                        repoRefreshStatus[dir.path]?.includes('new commit') && "bg-purple-500 hover:bg-purple-600"
+                  {dir.isGitRepo && (
+                    <>
+                      <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">Git Actions</h3>
+                      <div className="flex flex-row gap-2">
+                        <button
+                          onClick={() => repoCheckUpdates(dir.path)}
+                          className={classNames(
+                            "flex gap-2 cursor-pointer justify-center items-center px-4 py-2 text-white text-sm rounded-lg transition bg-gray-700 hover:opacity-90",
+                            repoRefreshStatus[dir.path] === 'Up to date' && "bg-green-600 hover:bg-green-700",
+                            repoRefreshStatus[dir.path]?.includes('new commit') && "bg-purple-500 hover:bg-purple-600"
 
-                      )}
-                    >
-                      {repoRefreshStatus[dir.path] === 'Up to date' ? (
-                        <FaCheck size={16} />
-                      ) : (
-                        <IoRefresh size={16} />
-                      )}
-                      {repoRefreshStatus[dir.path] || 'Check Updates'}
-                    </button>
-                    <button
-                      onClick={() => repoGitPull(dir.path)}
-                      className={classNames(
-                        "flex gap-2 cursor-pointer justify-center items-center px-4 py-2 text-white text-sm rounded-lg transition",
-                        repoGitPullStatus[dir.path] === 'Pull success' ? "bg-green-600 hover:bg-green-700" : "bg-gray-700 hover:opacity-90"
-                      )}
-                    >
-                      {repoGitPullStatus[dir.path] === 'Pull success' ? (
-                        <FaCheck size={16} />
-                      ) : (
-                        <FaCodePullRequest size={16} />
-                      )}
-                      {repoGitPullStatus[dir.path] || 'Git Pull'}
-                    </button>
-                  </div>
+                          )}
+                        >
+                          {repoRefreshStatus[dir.path] === 'Up to date' ? (
+                            <FaCheck size={16} />
+                          ) : (
+                            <IoRefresh size={16} />
+                          )}
+                          {repoRefreshStatus[dir.path] || 'Check Updates'}
+                        </button>
+                        <button
+                          onClick={() => repoGitPull(dir.path)}
+                          className={classNames(
+                            "flex gap-2 cursor-pointer justify-center items-center px-4 py-2 text-white text-sm rounded-lg transition",
+                            repoGitPullStatus[dir.path] === 'Pull success' ? "bg-green-600 hover:bg-green-700" : "bg-gray-700 hover:opacity-90"
+                          )}
+                        >
+                          {repoGitPullStatus[dir.path] === 'Pull success' ? (
+                            <FaCheck size={16} />
+                          ) : (
+                            <FaCodePullRequest size={16} />
+                          )}
+                          {repoGitPullStatus[dir.path] || 'Git Pull'}
+                        </button>
+                      </div>
+                    </>
+                  )}
                 </div>
                 {/* Git Actions */}
               </div>
@@ -552,6 +559,26 @@ const DirectoryList: React.FC<Props> = ({ directories, setDirectories }) => {
         />
       )}
 
+      {selectedDirectories?.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 2 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2 }}
+          className="
+          fixed bottom-4 right-4 
+          bg-gray-700 text-white 
+          px-4 py-2 cursor-pointer
+          rounded-xl shadow-lg 
+          text-sm 
+          z-50
+          hover:opacity-70
+        ">
+          <div className="flex flex-row items-center gap-3" onClick={() => alert(selectedDirectories.join('\n'))}>
+            <TbFolderCheck size={20} />
+            {selectedDirectories.length}
+          </div>
+        </motion.div>
+      )}
     </>
   );
 };
